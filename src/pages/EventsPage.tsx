@@ -36,6 +36,11 @@ interface EventsPageProps {
     eventId: string,
     ticket: { name: string; presalePrice: number; regularPrice: number; capacity: number }
   ) => Promise<void>;
+  onUpdateTicketType?: (
+    eventId: string,
+    ticketTypeId: string,
+    ticket: { name: string; presalePrice: number; regularPrice: number; capacity: number }
+  ) => Promise<void>;
 }
 
 export function EventsPage({
@@ -45,6 +50,7 @@ export function EventsPage({
   onViewEventOrders,
   onCreateEvent,
   onAddTicketType,
+  onUpdateTicketType,
 }: EventsPageProps) {
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState<'all' | EventStatus>('all');
@@ -165,16 +171,27 @@ export function EventsPage({
     setTicketDrawerOpen(true);
   };
 
-  const handleSaveTicketType = (e?: React.SyntheticEvent) => {
+  const handleSaveTicketType = async (e?: React.SyntheticEvent) => {
     if (e) e.preventDefault();
     if (!selectedEvent) return;
+    if (editingTicket && onUpdateTicketType) {
+      await onUpdateTicketType(selectedEvent.id, editingTicket.id, {
+        name: ttName.trim() || 'General',
+        presalePrice: Number(ttPresale) || 0,
+        regularPrice: Number(ttRegular) || 0,
+        capacity: Number(ttCapacity) || 0,
+      });
+      setTicketDrawerOpen(false);
+      return;
+    }
     if (!editingTicket && onAddTicketType) {
-      void onAddTicketType(selectedEvent.id, {
+      await onAddTicketType(selectedEvent.id, {
         name: ttName.trim() || 'Nuevo boleto',
         presalePrice: Number(ttPresale) || 0,
         regularPrice: Number(ttRegular) || 0,
         capacity: Number(ttCapacity) || 0,
-      }).then(() => setTicketDrawerOpen(false));
+      });
+      setTicketDrawerOpen(false);
       return;
     }
     const newTt: TicketType = {

@@ -19,6 +19,7 @@ import {
 } from 'lucide-react';
 import {
   addTicketType,
+  updateTicketType,
   cancelOrder,
   checkIn,
   createEvent,
@@ -532,6 +533,15 @@ export function App() {
                   regularPrice: ticket.regularPrice,
                   presalePrice: ticket.presalePrice || null,
                   presaleEndsAt: null,
+                  capacity: ticket.capacity,
+                });
+                await refreshCore();
+              }}
+              onUpdateTicketType={async (eventId, ticketTypeId, ticket) => {
+                await updateTicketType(eventId, ticketTypeId, {
+                  name: ticket.name,
+                  regularPrice: ticket.regularPrice,
+                  presalePrice: ticket.presalePrice || null,
                   capacity: ticket.capacity,
                 });
                 await refreshCore();

@@ -156,6 +156,23 @@ export function addTicketType(
   }).then(toTicket);
 }
 
+export function updateTicketType(
+  eventId: string,
+  ticketTypeId: string,
+  input: {
+    name: string;
+    regularPrice: number;
+    presalePrice: number | null;
+    presaleEndsAt?: string | null;
+    capacity: number;
+  }
+): Promise<TicketType> {
+  return request<ApiTicket>(`/api/v1/events/${eventId}/ticket-types/${ticketTypeId}`, {
+    method: 'PUT',
+    body: JSON.stringify(input),
+  }).then(toTicket);
+}
+
 export function cancelOrder(orderId: string): Promise<void> {
   return request(`/api/v1/orders/${orderId}/cancel`, { method: 'POST' });
 }
