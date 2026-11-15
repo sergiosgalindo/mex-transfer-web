@@ -347,10 +347,11 @@ export function DashboardPage({
 
           <button
             type="button"
-            onClick={() => onNavigate('payments')}
-            className="mt-4 w-full rounded-lg border border-slate-200 py-2 text-xs font-medium text-slate-700 hover:bg-slate-50 dark:border-zinc-800 dark:text-zinc-300 dark:hover:bg-zinc-800"
+            disabled
+            className="mt-4 w-full rounded-lg border border-slate-200 py-2 text-xs font-medium text-slate-400 opacity-60 cursor-not-allowed dark:border-zinc-800 dark:text-zinc-500"
+            title="Módulo desactivado temporalmente"
           >
-            Ir a Pagos y conciliación
+            Pagos y conciliación (Desactivado)
           </button>
         </div>
       </div>

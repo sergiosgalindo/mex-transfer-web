@@ -44,7 +44,7 @@ import { AlertsPage, SettingsPage } from './pages/AlertsAndSettingsPages';
 
 const NAV_GROUPS: {
   label: string;
-  items: { id: NavSection; label: string; icon: React.ReactNode }[];
+  items: { id: NavSection; label: string; icon: React.ReactNode; disabled?: boolean }[];
 }[] = [
   {
     label: 'Operación',
@@ -56,6 +56,7 @@ const NAV_GROUPS: {
         id: 'check_in',
         label: 'Validar accesos',
         icon: <QrCode className="h-4 w-4" />,
+        disabled: true,
       },
     ],
   },
@@ -66,11 +67,13 @@ const NAV_GROUPS: {
         id: 'payments',
         label: 'Pagos y conciliación',
         icon: <CreditCard className="h-4 w-4" />,
+        disabled: true,
       },
       {
         id: 'alerts',
         label: 'Alertas / revisión manual',
         icon: <AlertTriangle className="h-4 w-4" />,
+        disabled: true,
       },
     ],
   },
@@ -320,27 +323,40 @@ export function App() {
               <div className="space-y-0.5">
                 {group.items.map((item) => {
                   const isActive = activeSection === item.id;
+                  const isDisabled = Boolean(item.disabled);
                   return (
                     <button
                       key={item.id}
                       type="button"
+                      disabled={isDisabled}
                       onClick={() => {
+                        if (isDisabled) return;
                         setActiveSection(item.id);
                         setMobileMenuOpen(false);
                       }}
-                      title={sidebarCollapsed ? item.label : undefined}
+                      title={
+                        isDisabled
+                          ? `${item.label} (Desactivado)`
+                          : sidebarCollapsed
+                          ? item.label
+                          : undefined
+                      }
                       className={`relative flex w-full items-center gap-2.5 rounded-lg px-2.5 py-2 text-sm font-medium transition-colors ${
-                        isActive
+                        isDisabled
+                          ? 'cursor-not-allowed opacity-40 text-slate-400 select-none dark:text-zinc-600'
+                          : isActive
                           ? 'bg-emerald-50/90 text-emerald-700 dark:bg-emerald-950/50 dark:text-emerald-300'
                           : 'text-slate-600 hover:bg-slate-100/80 hover:text-slate-900 dark:text-zinc-400 dark:hover:bg-zinc-800/60 dark:hover:text-zinc-100'
                       }`}
                     >
-                      {isActive && (
+                      {isActive && !isDisabled && (
                         <span className="absolute left-0 top-1.5 bottom-1.5 w-0.5 rounded-r bg-emerald-600 dark:bg-emerald-400" />
                       )}
                       <span
                         className={
-                          isActive
+                          isDisabled
+                            ? 'text-slate-400 dark:text-zinc-600'
+                            : isActive
                             ? 'text-emerald-600 dark:text-emerald-400'
                             : 'text-slate-400 dark:text-zinc-500'
                         }
@@ -350,7 +366,13 @@ export function App() {
                       {!sidebarCollapsed && (
                         <span className="truncate">{item.label}</span>
                       )}
+                      {!sidebarCollapsed && isDisabled && (
+                        <span className="ml-auto rounded bg-slate-100 px-1.5 py-0.5 text-[10px] font-medium text-slate-400 dark:bg-zinc-800 dark:text-zinc-500">
+                          Próx.
+                        </span>
+                      )}
                       {!sidebarCollapsed &&
+                        !isDisabled &&
                         item.id === 'alerts' &&
                         openAlertsCount > 0 && (
                           <span className="ml-auto rounded-full bg-violet-100 px-1.5 py-0.5 text-[11px] font-semibold text-violet-700 tabular-nums dark:bg-violet-950 dark:text-violet-300">
@@ -668,6 +690,37 @@ export function App() {
           </div>
         </div>
       )}
+      {/* Floating WhatsApp Action Button */}
+      <a
+        href="https://wa.me/15551566290?text=Hola%2C%20quiero%20informaci%C3%B3n%20de%20boletos"
+        target="_blank"
+        rel="noopener noreferrer"
+        aria-label="Abrir bot de WhatsApp"
+        className="group fixed bottom-6 right-6 z-40 flex items-center gap-3 rounded-full bg-[#25D366] px-4 py-3 text-white shadow-xl shadow-emerald-600/30 ring-4 ring-emerald-500/20 transition-all duration-200 hover:scale-105 hover:bg-[#20bd5a] hover:shadow-2xl hover:shadow-emerald-600/40 active:scale-95"
+      >
+        <div className="relative flex items-center justify-center">
+          {/* WhatsApp SVG Icon */}
+          <svg
+            className="h-6 w-6 fill-current text-white transition-transform duration-200 group-hover:rotate-12"
+            viewBox="0 0 24 24"
+            aria-hidden="true"
+          >
+            <path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.46 3.45 1.32 4.95L2.05 22l5.25-1.38c1.45.79 3.08 1.21 4.74 1.21 5.46 0 9.91-4.45 9.91-9.91 0-2.65-1.03-5.14-2.9-7.01A9.816 9.816 0 0 0 12.04 2zm0 18.09c-1.52 0-3-.4-4.3-1.17l-.31-.18-3.19.84.85-3.11-.2-.32a8.03 8.03 0 0 1-1.23-4.24c0-4.46 3.63-8.09 8.09-8.09 2.16 0 4.19.84 5.72 2.37s2.37 3.56 2.37 5.72c0 4.46-3.63 8.08-8.1 8.08zm4.44-6.07c-.24-.12-1.44-.71-1.66-.79-.22-.09-.39-.12-.55.12-.17.24-.63.79-.78.95-.14.16-.29.18-.53.06-.24-.12-1.03-.38-1.96-1.21-.73-.65-1.22-1.45-1.36-1.69-.14-.24-.02-.37.1-.49.11-.11.24-.29.37-.43.12-.14.16-.24.24-.4.08-.16.04-.31-.02-.43s-.55-1.33-.76-1.82c-.2-.48-.41-.41-.56-.42h-.48c-.16 0-.43.06-.66.31-.22.24-.87.85-.87 2.07s.89 2.4 1.01 2.56c.12.16 1.76 2.68 4.26 3.76.6.26 1.06.41 1.42.53.6.19 1.15.16 1.58.1.48-.07 1.47-.6 1.68-1.18.21-.58.21-1.08.15-1.18-.06-.1-.23-.16-.48-.28z" />
+          </svg>
+          <span className="absolute -top-1 -right-1 flex h-2.5 w-2.5">
+            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-white opacity-75"></span>
+            <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-white"></span>
+          </span>
+        </div>
+        <div className="flex flex-col text-left leading-tight">
+          <span className="text-[10px] font-semibold uppercase tracking-wider text-emerald-100">
+            Bot WhatsApp
+          </span>
+          <span className="text-sm font-bold tracking-tight">
+            Comprar boletos
+          </span>
+        </div>
+      </a>
     </div>
   );
 }
