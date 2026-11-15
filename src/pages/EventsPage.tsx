@@ -68,7 +68,8 @@ export function EventsPage({
 
   const selectedEvent = events.find((e) => e.id === selectedEventId) || null;
 
-  // Flyer & WhatsApp Promo Text state
+  // Event editing (Name, Flyer & WhatsApp Promo Text) state
+  const [eventName, setEventName] = useState('');
   const [promoText, setPromoText] = useState('');
   const [flyerPreview, setFlyerPreview] = useState<string | null>(null);
   const [savingFlyer, setSavingFlyer] = useState(false);
@@ -76,10 +77,11 @@ export function EventsPage({
 
   useEffect(() => {
     if (selectedEvent) {
+      setEventName(selectedEvent.name || '');
       setPromoText(selectedEvent.description || '');
       setFlyerPreview(selectedEvent.flyerImage || null);
     }
-  }, [selectedEvent?.id, selectedEvent?.description, selectedEvent?.flyerImage]);
+  }, [selectedEvent?.id, selectedEvent?.name, selectedEvent?.description, selectedEvent?.flyerImage]);
 
   const handleFlyerFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -98,6 +100,7 @@ export function EventsPage({
     setSavingFlyer(true);
     try {
       const updated = await updateEventFlyer(selectedEvent.id, {
+        name: eventName.trim() || selectedEvent.name,
         description: promoText,
         flyerImage: flyerPreview,
       });
@@ -106,16 +109,17 @@ export function EventsPage({
           ev.id === selectedEvent.id
             ? {
                 ...ev,
+                name: updated.name,
                 description: updated.description,
                 flyerImage: updated.flyerImage,
               }
             : ev
         )
       );
-      setFlyerToast('Flyer y mensaje de WhatsApp guardados en el Core.');
+      setFlyerToast('Evento y flyer guardados correctamente.');
       setTimeout(() => setFlyerToast(null), 3500);
     } catch {
-      setFlyerToast('Error al guardar el flyer en el Core.');
+      setFlyerToast('Error al guardar cambios del evento en el Core.');
       setTimeout(() => setFlyerToast(null), 3500);
     } finally {
       setSavingFlyer(false);
@@ -325,10 +329,10 @@ export function EventsPage({
             <div>
               <h2 className="flex items-center gap-2 text-sm font-semibold text-slate-900 dark:text-zinc-100">
                 <MessageSquare className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
-                Flyer y Mensaje Promocional para WhatsApp
+                Información del Evento y Flyer para WhatsApp
               </h2>
               <p className="mt-0.5 text-xs text-slate-500 dark:text-zinc-400">
-                Cuando el comprador selecciona este evento en WhatsApp, recibe automáticamente este flyer con este mensaje promocional antes de elegir sus boletos.
+                Puedes editar el nombre del evento, el flyer oficial y el mensaje promocional que recibe el usuario en WhatsApp.
               </p>
             </div>
             <div className="flex items-center gap-2">
@@ -345,7 +349,7 @@ export function EventsPage({
                 className="inline-flex items-center gap-1.5 rounded-lg bg-emerald-600 px-3.5 py-2 text-xs font-semibold text-white hover:bg-emerald-700 disabled:opacity-50"
               >
                 <CheckCircle2 className="h-3.5 w-3.5" />
-                {savingFlyer ? 'Guardando...' : 'Guardar flyer y mensaje'}
+                {savingFlyer ? 'Guardando...' : 'Guardar cambios'}
               </button>
             </div>
           </div>
@@ -353,7 +357,7 @@ export function EventsPage({
           <div className="mt-4 grid grid-cols-1 gap-5 lg:grid-cols-12">
             {/* Flyer Upload & Preview */}
             <div className="lg:col-span-4 flex flex-col gap-3">
-              <label className="block text-xs font-medium text-slate-700 dark:text-zinc-300">
+              <label className="block text-xs font-semibold text-slate-700 dark:text-zinc-300">
                 Imagen del Flyer (JPG / PNG)
               </label>
               <div className="relative flex min-h-[260px] flex-col items-center justify-center overflow-hidden rounded-xl border border-dashed border-slate-300 bg-slate-50/70 p-3 dark:border-zinc-700 dark:bg-zinc-950/50">
@@ -397,24 +401,39 @@ export function EventsPage({
               </div>
             </div>
 
-            {/* Promotional Message Textarea */}
-            <div className="lg:col-span-8 flex flex-col">
-              <div className="flex items-center justify-between">
-                <label className="block text-xs font-medium text-slate-700 dark:text-zinc-300">
-                  Texto del mensaje que acompaña al flyer en WhatsApp
+            {/* Event Name & Promotional Message Textarea */}
+            <div className="lg:col-span-8 flex flex-col gap-4">
+              <div>
+                <label className="block text-xs font-semibold text-slate-700 dark:text-zinc-300">
+                  Nombre del evento
                 </label>
-                <span className="text-[11px] tabular-nums text-slate-400">
-                  {promoText.length} / 1024 caracteres
-                </span>
+                <input
+                  type="text"
+                  value={eventName}
+                  onChange={(e) => setEventName(e.target.value)}
+                  placeholder="Ej: Social de salsa"
+                  className="mt-1.5 w-full rounded-lg border border-slate-200 bg-white px-3.5 py-2 text-sm font-medium text-slate-900 focus:border-emerald-500 focus:outline-none dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-100"
+                />
               </div>
-              <textarea
-                rows={13}
-                maxLength={1900}
-                value={promoText}
-                onChange={(e) => setPromoText(e.target.value)}
-                placeholder="Escribe aquí el copy promocional con emojis, DJs, fecha, lugar y cover que acompañará al flyer en WhatsApp..."
-                className="mt-1.5 w-full flex-1 rounded-xl border border-slate-200 bg-white p-3.5 font-sans text-xs leading-relaxed text-slate-900 focus:border-emerald-500 focus:outline-none dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-100"
-              />
+
+              <div className="flex flex-col flex-1">
+                <div className="flex items-center justify-between">
+                  <label className="block text-xs font-semibold text-slate-700 dark:text-zinc-300">
+                    Texto del mensaje que acompaña al flyer en WhatsApp
+                  </label>
+                  <span className="text-[11px] tabular-nums text-slate-400">
+                    {promoText.length} / 1024 caracteres
+                  </span>
+                </div>
+                <textarea
+                  rows={9}
+                  maxLength={1900}
+                  value={promoText}
+                  onChange={(e) => setPromoText(e.target.value)}
+                  placeholder="Escribe aquí el copy promocional con emojis, DJs, fecha, lugar y cover que acompañará al flyer en WhatsApp..."
+                  className="mt-1.5 w-full flex-1 rounded-xl border border-slate-200 bg-white p-3.5 font-sans text-xs leading-relaxed text-slate-900 focus:border-emerald-500 focus:outline-none dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-100"
+                />
+              </div>
             </div>
           </div>
         </div>

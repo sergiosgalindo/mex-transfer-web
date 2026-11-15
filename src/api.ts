@@ -130,11 +130,26 @@ export function createEvent(input: {
 export function updateEventFlyer(
   eventId: string,
   input: {
+    name?: string;
     description: string;
     flyerImage: string | null;
   }
 ): Promise<EventItem> {
   return request<ApiEvent>(`/api/v1/events/${eventId}/flyer`, {
+    method: 'PUT',
+    body: JSON.stringify(input),
+  }).then(toEvent);
+}
+
+export function updateEvent(
+  eventId: string,
+  input: {
+    name?: string;
+    description?: string;
+    flyerImage?: string | null;
+  }
+): Promise<EventItem> {
+  return request<ApiEvent>(`/api/v1/events/${eventId}`, {
     method: 'PUT',
     body: JSON.stringify(input),
   }).then(toEvent);
