@@ -165,8 +165,8 @@ export function EventsPage({
     setTicketDrawerOpen(true);
   };
 
-  const handleSaveTicketType = (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSaveTicketType = (e?: React.SyntheticEvent) => {
+    if (e) e.preventDefault();
     if (!selectedEvent) return;
     if (!editingTicket && onAddTicketType) {
       void onAddTicketType(selectedEvent.id, {
@@ -490,8 +490,8 @@ export function EventsPage({
                 Cancelar
               </button>
               <button
-                type="submit"
-                form="ticket-type-form"
+                type="button"
+                onClick={handleSaveTicketType}
                 className="rounded-lg bg-emerald-600 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-700"
               >
                 Guardar cambios
