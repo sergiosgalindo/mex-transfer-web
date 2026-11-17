@@ -56,7 +56,6 @@ const NAV_GROUPS: {
         id: 'check_in',
         label: 'Validar accesos',
         icon: <QrCode className="h-4 w-4" />,
-        disabled: true,
       },
     ],
   },
